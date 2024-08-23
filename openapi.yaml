@@ -1,0 +1,104 @@
+openapi: 3.0.0
+info:
+  title: Elastic Serverless Example API
+  description: Example API to test Elastic serverless
+  version: 1.0.0
+
+x-amazon-apigateway-cors:
+  allowOrigins:
+    - '*'
+  allowMethods:
+    - POST
+  allowHeaders:
+    - content-type
+  maxAge: 3600
+
+paths:
+  /data:
+    post:
+      summary: Adds new data to the system
+      responses:
+        201:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /search:
+    post:
+      summary: Searches data for a set of criteria
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Data'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchCriteria'
+
+components:
+  schemas:
+    SearchCriteria:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        color:
+          type: string
+        sport:
+          type: string
+        fruit:
+          type: string
+        number:
+          type: number
+        animal:
+          type: object
+          properties:
+            type:
+              type: string
+            name:
+              type: string
+
+    Data:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+        - $ref: '#/components/schemas/SearchCriteria'
+
+  responses:
+    InternalServerError: #500
+      description: The server encountered an unexpected condition which prevented it from fulfilling the request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: An error occurred saving the item.
+            required:
+              - message
